@@ -1,0 +1,41 @@
+{
+  "name": "QURAN",
+  "author": {
+    "name": "MOHAMED ALROMAIHI",
+    "email": "alromaihi2224@egmail.com"
+  },
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "google-maps-react": "^2.0.6",
+    "js-cookie": "^3.0.5",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.475.0",
+    "mongodb": "^6.13.0",
+    "react": "^18.2.0",
+    "react-autosuggest": "^10.1.0",
+    "react-color": "^2.19.3",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.4.0",
+    "react-leaflet": "^5.0.0",
+    "react-pageflip": "^2.0.3",
+    "react-router-dom": "^7.1.5",
+    "react-search-box": "^3.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.16",
+    "daisyui": "^4.12.23",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.10",
+    "vite": "^4.5.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

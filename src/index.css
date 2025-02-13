@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+box-sizing: border-box;
+
+
+}
+
+[data-theme='{Theme}'] body {
+border:none;
+} 
+/* dark mode */
+:root {
+  --bg: #1a202c;
+  --bg-accent: #2d3748;
+  --text: #e2e8f0;
+  --text-accent: #cbd5e0;
+  --border: #4a5568;
+  --border-accent: #718096;
+  --code-bg: #2d3748;
+  --code-text: #e2e8f0;
+  --code-border: #4a5568;
+}
+/* Transparency */
+
+.DarkMode {
+  --bg: #f7fafc;
+  --bg-accent: #edf2f7;
+  --text: #2d3748;
+  --text-accent: #4a5568;
+  --border: #cbd5e0;
+  --border-accent: #e2e8f0;
+  --code-bg: #f7fafc;
+  --code-text: #2d3748;
+  --code-border: #cbd5e0;
+}
+
+body.DarkMode {
+ 
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.DarkMode .CodeMirror {
+  background-color: var(--code-bg);
+  color: var(--code-text);
+}
+
+.DarkMode .CodeMirror-gutters {
+  background-color: var(--code-bg);
+  color: var(--code-text);
+}
+.nav {
+  margin-top:0 !important;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: var(--bg-accent);
+  border-bottom: 1px solid var(--border-accent);
+}
+.quran-title {
+  font-family: "Reem Kufi", serif;
+  font-optical-sizing:auto;
+  font-size: 1.8rem ;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.play-bar{
+ position: relative;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  cursor: pointer;
+  z-index: 1000;
+  background-color: var(--bg-accent);
+  border-top: 1px solid var(--border-accent);
+}
+#audioPlayer {
+  display: flex;
+  align-items: center;
+  font-size: 3rem !important;
+  color: red;
+}
+
+
