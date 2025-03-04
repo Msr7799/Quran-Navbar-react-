@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-
-
-const apiUrl = 'https://mp3quran.net/api/v3';
+// Updated API URL with www
+const apiUrl = 'https://www.mp3quran.net/api/v3';
 
 const QuranNavbar = () => {
   const [language, setLanguage] = useState('ar');
@@ -14,6 +13,8 @@ const QuranNavbar = () => {
   const [selectedMoshaf, setSelectedMoshaf] = useState(null);
   const [selectedSurah, setSelectedSurah] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getReciters();
@@ -28,38 +29,110 @@ const QuranNavbar = () => {
     isDarkMode ? 'dark' : 'light'
   );
   const getReciters = async () => {
-    const res = await fetch(`${apiUrl}/reciters?language=${language}`);
-    const data = await res.json();
-    setReciters(data.reciters);
+    try {
+      setLoading(true);
+      setError(null);
+      // Set timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const res = await fetch(`${apiUrl}/reciters?language=${language}`, {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok)
+        throw new Error(`Failed to fetch reciters (Status: ${res.status})`);
+      const data = await res.json();
+      setReciters(data.reciters || []);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setError('Request timeout. Please try again.');
+      } else {
+        setError('Error loading reciters: ' + err.message);
+      }
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getMoshafs = async reciterId => {
-    const res = await fetch(
-      `${apiUrl}/reciters?language=${language}&reciter=${reciterId}`
-    );
-    const data = await res.json();
-    if (data.reciters && data.reciters.length > 0) {
-      setMoshafs(data.reciters[0].moshaf);
+    try {
+      setLoading(true);
+      setError(null);
+      // Set timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const res = await fetch(
+        `${apiUrl}/reciters?language=${language}&reciter=${reciterId}`,
+        { signal: controller.signal }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok)
+        throw new Error(`Failed to fetch moshafs (Status: ${res.status})`);
+      const data = await res.json();
+      if (data.reciters && data.reciters.length > 0) {
+        setMoshafs(data.reciters[0].moshaf || []);
+      } else {
+        setMoshafs([]);
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setError('Request timeout. Please try again.');
+      } else {
+        setError('Error loading moshafs: ' + err.message);
+      }
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const getSurahs = async (surahServer, surahList) => {
-    const res = await fetch('https://mp3quran.net/api/v3/suwar');
-    const data = await res.json();
-    const surahNames = data.suwar;
-    const surahArray = surahList.split(',');
+    try {
+      setLoading(true);
+      setError(null);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const surahOptions = surahArray.map(surah => {
-      const padSurah = surah.padStart(3, '0');
-      const surahName = surahNames.find(surahName => surahName.id == surah);
-      return {
-        id: surah,
-        name: surahName.name,
-        url: `${surahServer}${padSurah}.mp3`
-      };
-    });
+      const res = await fetch('https://www.mp3quran.net/api/v3/suwar', {
+        signal: controller.signal
+      });
 
-    setSurahs(surahOptions);
+      clearTimeout(timeoutId);
+
+      if (!res.ok)
+        throw new Error(`Failed to fetch surahs (Status: ${res.status})`);
+      const data = await res.json();
+      const surahNames = data.suwar;
+      const surahArray = surahList.split(',');
+
+      const surahOptions = surahArray.map(surah => {
+        const padSurah = surah.padStart(3, '0');
+        const surahName = surahNames.find(surahName => surahName.id == surah);
+        return {
+          id: surah,
+          name: surahName ? surahName.name : `Surah ${surah}`,
+          url: `${surahServer}${padSurah}.mp3`
+        };
+      });
+
+      setSurahs(surahOptions);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        setError('Request timeout. Please try again.');
+      } else {
+        setError('Error loading surahs: ' + err.message);
+      }
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const playSurah = surahMp3 => {
@@ -249,11 +322,11 @@ const QuranNavbar = () => {
                     </select>
                   </fieldset>
                 </div>
-              <div className='flex flex-col text-4xl text-center'>  
-                <Link to='/qibla' className='btn btn-ghost btn-circle'>
-                  قبلة
-                </Link>
-              </div>
+                <div className='flex flex-col text-4xl text-center'>
+                  <Link to='/qibla' className='btn btn-ghost btn-circle'>
+                    قبلة
+                  </Link>
+                </div>
               </div>
               <div className='flex justify-end'>
                 <Link to='/quran/pages'>صفحات القرآن</Link>
@@ -288,6 +361,8 @@ const QuranNavbar = () => {
                 </div>
               ))}
             </div>
+            {error && <div className='text-red-500 p-4'>{error}</div>}
+            {loading && <div className='text-blue-500 p-4'>Loading...</div>}
           </div>
         </div>
       </div>
