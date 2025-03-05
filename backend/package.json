@@ -1,0 +1,27 @@
+{
+  "name": "quran-app-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Quran Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "import-data": "node utils/importData.js",
+    "import-tafsir": "node utils/importTafsirData.js",
+    "check-collections": "node utils/checkTafseerCollection.js",
+    "explore-db": "node utils/exploreDatabase.js",
+    "check-surahs": "node utils/checkSurahsCollection.js",
+    "import-fix": "node utils/importFix.js"
+  },
+  "author": "Mohamed Alromaihi <alromaihi2224@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mongoose": "^6.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}

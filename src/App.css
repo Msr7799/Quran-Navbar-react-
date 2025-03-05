@@ -1,0 +1,103 @@
+/* استيراد الخطوط العربية */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* تهيئة المستند بالكامل */
+:root {
+  --font-primary: 'Tajawal', sans-serif;
+  --font-quran: 'Amiri', serif;
+  --transition-speed: 0.3s;
+  --border-radius: 0.5rem;
+  --direction: rtl;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  direction: var(--direction);
+}
+
+/* خطوط القرآن */
+.font-quran {
+  font-family: var(--font-quran);
+}
+
+/* أنماط السمة */
+.dark-theme {
+  --bg-main: #121212;
+  --bg-card: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+}
+
+.light-theme {
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+}
+
+/* تحسينات لوضع الطباعة */
+@media print {
+  nav,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background-color: white;
+    color: black;
+  }
+}
+
+/* تعديلات الاتجاه من اليمين إلى اليسار */
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
+}
+
+/* تحسينات الوصول */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* أنماط تنسيق القرآن */
+.quran-text {
+  font-family: var(--font-quran);
+  line-height: 2;
+  text-align: justify;
+  font-size: 1.25rem;
+  margin: 1rem 0;
+}
+
+/* أنماط تكيفية للجوال */
+@media (max-width: 768px) {
+  .quran-text {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+}

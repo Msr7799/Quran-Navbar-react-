@@ -1,95 +1,391 @@
 @import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html {
-box-sizing: border-box;
-
-
+/* Base settings */
+html,
+body {
+  box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-[data-theme='{Theme}'] body {
-border:none;
-} 
-/* dark mode */
+/* Add RTL support */
+.rtl {
+  direction: rtl;
+}
+
+/* Theme variables */
 :root {
-  --bg: #1a202c;
-  --bg-accent: #2d3748;
-  --text: #e2e8f0;
-  --text-accent: #cbd5e0;
-  --border: #4a5568;
-  --border-accent: #718096;
-  --code-bg: #2d3748;
-  --code-text: #e2e8f0;
-  --code-border: #4a5568;
-}
-/* Transparency */
-
-.DarkMode {
-  --bg: #f7fafc;
-  --bg-accent: #edf2f7;
-  --text: #2d3748;
-  --text-accent: #4a5568;
-  --border: #cbd5e0;
-  --border-accent: #e2e8f0;
-  --code-bg: #f7fafc;
-  --code-text: #2d3748;
-  --code-border: #cbd5e0;
+  --bg-color: #ffffff;
+  --text-color: #0f172a;
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --card-bg: #f3f4f6;
+  --quran-bg: #f8f6e9;
 }
 
-body.DarkMode {
- 
-  background-color: var(--bg);
-  color: var(--text);
+.dark-mode {
+  --bg-color: #1e293b;
+  --text-color: #e2e8f0;
+  --primary-color: #3b82f6;
+  --primary-hover: #60a5fa;
+  --card-bg: #334155;
+  --quran-bg: #2a2622;
 }
 
-.DarkMode .CodeMirror {
-  background-color: var(--code-bg);
-  color: var(--code-text);
-}
-
-.DarkMode .CodeMirror-gutters {
-  background-color: var(--code-bg);
-  color: var(--code-text);
-}
-.nav {
-  margin-top:0 !important;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--bg-accent);
-  border-bottom: 1px solid var(--border-accent);
-}
+/* Typography */
 .quran-title {
-  font-family: "Reem Kufi", serif;
-  font-optical-sizing:auto;
-  font-size: 1.8rem ;
+  font-family: 'Reem Kufi', serif;
+  font-optical-sizing: auto;
+  font-size: 1.8rem;
   font-weight: 400;
-  font-style: normal;
 }
 
-.play-bar{
- position: relative;
+/* Navigation and UI elements */
+.play-bar {
+  position: relative;
+  display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  bottom: 0;
-  left: 0;
-  right: 0;
   padding: 1rem;
-  cursor: pointer;
-  z-index: 1000;
-  background-color: var(--bg-accent);
-  border-top: 1px solid var(--border-accent);
+  z-index: 10;
 }
+
 #audioPlayer {
   display: flex;
   align-items: center;
-  font-size: 3rem !important;
-  color: red;
+  width: 100%;
 }
 
+/* Loader animation */
+.loader {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+}
 
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Utility classes */
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+.hover\:bg-primary-dark:hover {
+  background-color: var(--primary-hover);
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.hover\:text-primary-dark:hover {
+  color: var(--primary-hover);
+}
+
+/* Special font for Quran text */
+.font-quran {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  line-height: 2;
+}
+
+/* Video aspect ratio fix */
+.aspect-w-16 {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.aspect-w-16 > iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Quran Viewer Specific Styles */
+.quran-pages {
+  background-color: var(--quran-bg);
+  min-height: 70vh;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.page-container {
+  max-width: 100%;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+}
+
+.page-container img {
+  max-height: 70vh;
+  width: auto;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+}
+
+.page-info {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dark-mode .page-info {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Index Styling */
+.tabs-boxed .tab {
+  cursor: pointer;
+}
+
+.tabs-boxed .tab-active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* Quran book specific styles for the old component */
+.quran-book {
+  direction: rtl !important;
+  transform: scaleX(-1) !important; /* Mirror the entire book */
+}
+
+.quran-book div.page {
+  direction: rtl !important;
+  transform: scaleX(-1) !important; /* Mirror back each page for correct text */
+  transform-origin: center center !important;
+}
+
+.quran-book .page {
+  transform: scaleX(-1) !important;
+}
+
+/* Improved Special fix for RTL book display */
+.stf__parent {
+  background-color: rgba(255, 255, 240, 0.5) !important;
+  border-radius: 10px !important;
+  padding: 20px !important;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  justify-content: center !important;
+  transform: scaleX(-1) !important; /* Flip the entire book for RTL */
+}
+
+/* Fix flipped pages */
+.stf__parent .page {
+  transform: scaleX(-1) !important; /* Flip back each page to be readable */
+}
+
+.stf__wrapper {
+  direction: rtl !important;
+}
+
+.stf__block {
+  box-shadow: rgba(0, 0, 0, 0.15) 0 0 8px !important;
+}
+
+.stf__block.--right {
+  transform-origin: left center !important;
+}
+
+.stf__block.--left {
+  transform-origin: right center !important;
+}
+
+.stf__shadow {
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.05)
+  ) !important;
+  opacity: 0.5 !important;
+}
+
+/* Hard cover styling */
+.page:first-child,
+.page:last-child {
+  background-color: #cc9955 !important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix for DaisyUI theme application */
+body[data-theme],
+[data-theme] .navbar,
+[data-theme] .alert,
+[data-theme] .btn,
+[data-theme] .card,
+[data-theme] .input,
+[data-theme] .select,
+[data-theme] .dropdown {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Print specific styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .print-content img {
+    max-height: 100vh;
+    max-width: 100%;
+  }
+}
+
+/* إصلاح مشاكل CSS */
+@layer base {
+  html {
+    /* These properties are optional, so remove if causing errors */
+    /* -webkit-text-size-adjust: 100%; */
+    /* text-size-adjust: 100%; */
+  }
+}
+
+@layer components {
+  .dropdown {
+    position: relative;
+  }
+
+  .column-gap {
+    column-gap: 1rem;
+  }
+
+  .user-select-none {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  .transition-all {
+    transition: all 0.3s ease;
+  }
+}
+
+@layer base {
+  /* Reset text size adjust */
+  html {
+    text-size-adjust: 100%;
+  }
+
+  /* Fix RTL support */
+  [dir='rtl'] {
+    text-align: right;
+  }
+}
+
+@layer components {
+  /* Fix dropdown positioning */
+  .dropdown {
+    position: relative;
+  }
+
+  /* Fix column gap */
+  .column-gap {
+    gap: 1rem;
+  }
+
+  /* Fix user select */
+  .user-select-none {
+    user-select: none;
+  }
+
+  /* Fix transitions */
+  .transition-all {
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Fix appearance */
+  .appearance-none {
+    appearance: none;
+  }
+}
+
+/* Audio player styles */
+.audio-player {
+  width: 100%;
+  background: theme('colors.base-200');
+  border-radius: theme('borderRadius.lg');
+  padding: theme('spacing.4');
+}
+
+.audio-player audio {
+  width: 100%;
+}
+
+/* توجيه الصفحة من اليمين إلى اليسار */
+html {
+  direction: rtl;
+}
+
+/* إعدادات إضافية للخطوط والتباعد */
+@layer base {
+  html {
+    font-family: "Tajawal", system-ui, sans-serif;
+  }
+  
+  /* ضبط النص العربي */
+  .arabic-text {
+    font-family: "Amiri", serif;
+    line-height: 1.8;
+  }
+  
+  /* أنماط الآيات */
+  .verse-container {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .verse-text {
+    font-size: 1.25rem;
+  }
+  
+  .verse-number {
+    font-size: 0.875rem;
+    color: var(--primary-color);
+    margin-inline-start: 0.5rem;
+  }
+  
+  /* أنماط التنقل */
+  .active-link {
+    color: var(--primary-hover);
+    font-weight: 700;
+  }
+}

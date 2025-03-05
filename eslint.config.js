@@ -33,7 +33,9 @@ export default [
         'warn',
         { allowConstantExport: true }
       ],
-      'react/prop-types': 'off'
+      'react/prop-types': 'off',
+      'jsx-quotes': ['error', 'double'],
+      quotes: ['error', 'single']
     }
   }
 ];

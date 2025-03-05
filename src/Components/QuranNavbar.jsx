@@ -1,372 +1,246 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
-// Updated API URL with www
-const apiUrl = 'https://www.mp3quran.net/api/v3';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../ThemeContext';
+import {
+  Menu,
+  X,
+  Sun,
+  Moon,
+  Book,
+  Radio,
+  Search,
+  Settings,
+  Home,
+  Info,
+  Tv,
+  Bookmark
+} from 'lucide-react';
 
 const QuranNavbar = () => {
-  const [language, setLanguage] = useState('ar');
-  const [reciters, setReciters] = useState([]);
-  const [moshafs, setMoshafs] = useState([]);
-  const [surahs, setSurahs] = useState([]);
-  const [selectedReciter, setSelectedReciter] = useState(null);
-  const [selectedMoshaf, setSelectedMoshaf] = useState(null);
-  const [selectedSurah, setSelectedSurah] = useState(null);
-  const [searchResults, setSearchResults] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const { state, dispatch } = useTheme();
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  // إغلاق القائمة عند الانتقال بين الصفحات
   useEffect(() => {
-    getReciters();
-  }, [language]);
-  // use dark mode
-  const isDarkMode = document.body.classList.contains('dark-mode');
+    setMobileMenuOpen(false);
+  }, [location]);
 
-  document.documentElement.classList.toggle('dark-mode', isDarkMode);
-  document.documentElement.classList.toggle('light-mode', !isDarkMode);
-  document.documentElement.setAttribute(
-    'data-theme-mode',
-    isDarkMode ? 'dark' : 'light'
-  );
-  const getReciters = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      // Set timeout to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const res = await fetch(`${apiUrl}/reciters?language=${language}`, {
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok)
-        throw new Error(`Failed to fetch reciters (Status: ${res.status})`);
-      const data = await res.json();
-      setReciters(data.reciters || []);
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        setError('Request timeout. Please try again.');
+  // تغيير مظهر النافبار عند التمرير
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
       } else {
-        setError('Error loading reciters: ' + err.message);
+        setIsScrolled(false);
       }
-      console.error(err);
-    } finally {
-      setLoading(false);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // تفعيل الوضع المظلم والفاتح
+  const toggleDarkMode = () => {
+    dispatch({ type: 'TOGGLE_DARK_MODE' });
+  };
+
+  // تأثير الحركة للقائمة المتنقلة
+  const menuVariants = {
+    closed: {
+      opacity: 0,
+      x: '-100%',
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30
+      }
+    },
+    open: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30,
+        staggerChildren: 0.07,
+        delayChildren: 0.2
+      }
     }
   };
 
-  const getMoshafs = async reciterId => {
-    try {
-      setLoading(true);
-      setError(null);
-      // Set timeout to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      const res = await fetch(
-        `${apiUrl}/reciters?language=${language}&reciter=${reciterId}`,
-        { signal: controller.signal }
-      );
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok)
-        throw new Error(`Failed to fetch moshafs (Status: ${res.status})`);
-      const data = await res.json();
-      if (data.reciters && data.reciters.length > 0) {
-        setMoshafs(data.reciters[0].moshaf || []);
-      } else {
-        setMoshafs([]);
-      }
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        setError('Request timeout. Please try again.');
-      } else {
-        setError('Error loading moshafs: ' + err.message);
-      }
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const menuItemVariants = {
+    closed: { x: -20, opacity: 0 },
+    open: { x: 0, opacity: 1 }
   };
 
-  const getSurahs = async (surahServer, surahList) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const res = await fetch('https://www.mp3quran.net/api/v3/suwar', {
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok)
-        throw new Error(`Failed to fetch surahs (Status: ${res.status})`);
-      const data = await res.json();
-      const surahNames = data.suwar;
-      const surahArray = surahList.split(',');
-
-      const surahOptions = surahArray.map(surah => {
-        const padSurah = surah.padStart(3, '0');
-        const surahName = surahNames.find(surahName => surahName.id == surah);
-        return {
-          id: surah,
-          name: surahName ? surahName.name : `Surah ${surah}`,
-          url: `${surahServer}${padSurah}.mp3`
-        };
-      });
-
-      setSurahs(surahOptions);
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        setError('Request timeout. Please try again.');
-      } else {
-        setError('Error loading surahs: ' + err.message);
-      }
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const playSurah = surahMp3 => {
-    const audioPlayer = document.querySelector('#audioPlayer');
-    audioPlayer.src = surahMp3;
-    audioPlayer.play();
-  };
-
-  const searchVerses = async e => {
-    e.preventDefault();
-    const searchTitle = document.querySelector('#searchTitle').value;
-    const res = await fetch(
-      `https://api.alquran.cloud/v1/search/${searchTitle}/all/${language}`
-    );
-    const data = await res.json();
-    const results = data.data.matches.map(async match => {
-      const tafsirRes = await fetch(
-        `https://api.alquran.cloud/v1/ayah/${match.number}/editions/ar.jalalayn`
-      );
-      const tafsirData = await tafsirRes.json();
-      return {
-        surah: match.surah.name,
-        numberInSurah: match.numberInSurah,
-        text: match.text,
-        tafsir: tafsirData.data[0].text
-      };
-    });
-    setSearchResults(await Promise.all(results));
-  };
+  // تكوين العناصر في القائمة
+  const navItems = [
+    { to: '/', text: 'الرئيسية', icon: <Home size={20} /> },
+    { to: '/quran/pages', text: 'المصحف', icon: <Book size={20} /> },
+    { to: '/player', text: 'مشغل القرآن', icon: <Radio size={20} /> },
+    { to: '/quran/index', text: 'فهرس السور', icon: <Menu size={20} /> },
+    { to: '/search', text: 'البحث', icon: <Search size={20} /> },
+    { to: '/bookmarks', text: 'المفضلة', icon: <Bookmark size={20} /> },
+    { to: '/quran-radio', text: 'الإذاعات', icon: <Radio size={20} /> },
+    { to: '/live', text: 'قنوات مباشرة', icon: <Tv size={20} /> },
+    { to: '/settings', text: 'الإعدادات', icon: <Settings size={20} /> },
+    { to: '/about', text: 'عن التطبيق', icon: <Info size={20} /> }
+  ];
 
   return (
-    <div
-      data-theme='{theme}'
-      className='search-form border-4 flex flex-col w-full p-4'
+    <nav
+      className={`
+        sticky top-0 z-50 w-full backdrop-blur-md 
+        transition-all duration-300
+        ${isScrolled ? 'bg-base-100/90 shadow-md' : 'bg-base-100/70'}
+      `}
     >
-      <div className='container mx-auto'>
-        <div className='flex flex-col lg:flex-row'>
-          <div className='w-full'>
-            <form
-              className='flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between'
-              id='search-form'
-              name='gs'
-              method='submit'
-              role='search'
-              onSubmit={searchVerses}
+      <div className="container mx-auto px-4">
+        <div className="relative flex items-center justify-between h-16">
+          {/* زر القائمة للموبايل */}
+          <div className="lg:hidden flex items-center">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md hover:bg-base-200 focus:outline-none"
             >
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full'>
-                <div className='flex flex-col'>
-                  <fieldset>
-                    <p
-                      htmlFor='chooseLanguage '
-                      className='form-p quran-title mb-2'
-                    >
-                      اختر اللغة
-                    </p>
-                    <select
-                      id='chooseLanguage'
-                      className='form-select text-zinc-800 w-full p-2'
-                      value={language}
-                      onChange={e => setLanguage(e.target.value)}
-                    >
-                      <option value='ar'>العربية</option>
-                      <option value='eng'>الإنجليزية</option>
-                    </select>
-                  </fieldset>
-                </div>
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
 
-                <div className='flex flex-col'>
-                  <fieldset className='w-full'>
-                    <p
-                      htmlFor='searchTitle'
-                      className='form-p quran-title mb-2'
-                    >
-                      أبحث في القرآن
-                    </p>
-                    <input
-                      type='text'
-                      name='searchTitle'
-                      id='searchTitle'
-                      className='searchText w-full p-2'
-                      placeholder='أكتب كلمة البحث'
-                      autoComplete='on'
-                    />
-                    <button className='btn btn-ghost btn-circle'>
-                      <div className='indicator'>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          className='h-5 w-5'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                        >
-                          {' '}
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth='2'
-                            d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
-                          />{' '}
-                        </svg>
-                        <span className='badge badge-xs badge-primary indicator-item'></span>
-                      </div>
-                    </button>
-                  </fieldset>
-                </div>
-
-                <div className='flex flex-col'>
-                  <fieldset className='w-full'>
-                    <p
-                      htmlFor='chooseReciter'
-                      className='form-p quran-title mb-2'
-                    >
-                      أختر القارئ
-                    </p>
-                    <select
-                      name='Category'
-                      id='chooseReciter'
-                      className='form-select w-full p-2 text-zinc-800'
-                      onChange={e => {
-                        setSelectedReciter(e.target.value);
-                        getMoshafs(e.target.value);
-                      }}
-                    >
-                      <option value=''>اختر قارئ</option>
-                      {reciters.map(reciter => (
-                        <option key={reciter.id} value={reciter.id}>
-                          {reciter.name}
-                        </option>
-                      ))}
-                    </select>
-                  </fieldset>
-                </div>
-
-                <div className='flex flex-col'>
-                  <fieldset className='w-full'>
-                    <p
-                      htmlFor='chooseMoshaf'
-                      className='form-p quran-title mb-2'
-                    >
-                      أختر الرواية
-                    </p>
-                    <select
-                      id='chooseMoshaf'
-                      className='form-control w-full p-2 text-zinc-800'
-                      onChange={e => {
-                        const selectedOption = e.target.selectedOptions[0];
-                        const surahServer = selectedOption.dataset.server;
-                        const surahList = selectedOption.dataset.suraList;
-                        getSurahs(surahServer, surahList);
-                      }}
-                    >
-                      <option value=''>اختر رواية</option>
-                      {moshafs.map(moshaf => (
-                        <option
-                          key={moshaf.id}
-                          value={moshaf.id}
-                          data-server={moshaf.server}
-                          data-sura-list={moshaf.surah_list}
-                        >
-                          {moshaf.name}
-                        </option>
-                      ))}
-                    </select>
-                  </fieldset>
-                </div>
-
-                <div className='flex flex-col'>
-                  <fieldset className='w-full'>
-                    <p
-                      htmlFor='chooseSurah'
-                      className='form-p quran-title mb-2'
-                    >
-                      أختر السورة
-                    </p>
-                    <select
-                      name='Price'
-                      id='chooseSurah'
-                      className='form-select w-full p-2 text-zinc-800'
-                      onChange={e => playSurah(e.target.value)}
-                    >
-                      <option value=''>اختر سورة</option>
-                      {surahs.map(surah => (
-                        <option key={surah.id} value={surah.url}>
-                          {surah.name}
-                        </option>
-                      ))}
-                    </select>
-                  </fieldset>
-                </div>
-                <div className='flex flex-col text-4xl text-center'>
-                  <Link to='/qibla' className='btn btn-ghost btn-circle'>
-                    قبلة
-                  </Link>
-                </div>
-              </div>
-              <div className='flex justify-end'>
-                <Link to='/quran/pages'>صفحات القرآن</Link>
-              </div>
-            </form>
-
-            <div className='play-bar mt-10 bottom-4 left-4 right-4  border-2 border-sky-500 bg-white'>
-              <audio
-                controls
-                onPlay={() => console.log('playing')}
-                className='w-full h-full play-inner'
-                id='audioPlayer'
+          {/* الشعار */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link to="/" className="flex items-center">
+              <motion.img
+                src="/logo.png"
+                alt="Quran Logo"
+                className="h-8 w-auto"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              />
+              <motion.span
+                className="font-bold text-lg ml-2 hidden md:block"
+                whileHover={{ scale: 1.05 }}
               >
-                <source src='' type='audio/ogg' />
-                <source src='' type='audio/mpeg' />
-                Your browser does not support the audio element.
-              </audio>
-            </div>
+                القرآن الكريم
+              </motion.span>
+            </Link>
+          </div>
 
-            <div id='verseResults' className='mt-4'>
-              {searchResults.map((result, index) => (
-                <div
-                  key={index}
-                  className='mb-4 p-4 border rounded bg-base-100 shadow'
+          {/* القائمة للشاشات الكبيرة */}
+          <div className="hidden lg:block">
+            <div className="flex space-x-4 ml-4 items-center">
+              {navItems.map(item => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors
+                     ${
+                       isActive
+                         ? 'bg-primary text-primary-content'
+                         : 'hover:bg-base-200'
+                     }`
+                  }
                 >
-                  <div className='mb-2 font-bold'>
-                    {result.surah} - {result.numberInSurah}: {result.text}
-                  </div>
-                  <div className='text-sm text-gray-600'>
-                    تفسير: {result.tafsir}
-                  </div>
-                </div>
+                  <span className="ml-1">{item.icon}</span>
+                  <span>{item.text}</span>
+                </NavLink>
               ))}
             </div>
-            {error && <div className='text-red-500 p-4'>{error}</div>}
-            {loading && <div className='text-blue-500 p-4'>Loading...</div>}
+          </div>
+
+          {/* زر الوضع المظلم والفاتح */}
+          <div className="flex items-center">
+            <motion.button
+              onClick={toggleDarkMode}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-full hover:bg-base-200"
+            >
+              {state.isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </motion.button>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* القائمة المتنقلة للشاشات الصغيرة */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={menuVariants}
+            className="fixed inset-y-0 right-0 w-64 bg-base-100 shadow-xl z-50 overflow-y-auto"
+          >
+            <div className="p-4">
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                className="flex justify-between items-center mb-5"
+              >
+                <span className="font-bold text-xl">القائمة</span>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-md hover:bg-base-200"
+                >
+                  <X size={20} />
+                </button>
+              </motion.div>
+
+              <div className="space-y-1">
+                {navItems.map(item => (
+                  <motion.div key={item.to} variants={menuItemVariants}>
+                    <NavLink
+                      to={item.to}
+                      className={({ isActive }) =>
+                        `flex items-center px-3 py-3 rounded-md font-medium transition-colors
+                        ${
+                          isActive
+                            ? 'bg-primary text-primary-content'
+                            : 'hover:bg-base-200'
+                        }`
+                      }
+                    >
+                      <span className="ml-3">{item.icon}</span>
+                      <span>{item.text}</span>
+                    </NavLink>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.div
+                variants={menuItemVariants}
+                className="mt-10 p-3 bg-base-200 rounded-lg"
+              >
+                <div className="flex justify-between items-center">
+                  <span>الوضع المظلم</span>
+                  <button
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-full hover:bg-base-300"
+                  >
+                    {state.isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* خلفية شفافة للضغط خارج القائمة */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+        />
+      )}
+    </nav>
   );
 };
 
